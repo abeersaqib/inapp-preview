@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+
+<head>
+</head>
+
+<body>
+    <div class=container id=container></div>
+    <script type="module" src="preview.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            (function () {
+                window.parent.postMessage('PreviewAppLoaded', '*');
+                let previewQueue = [];
+                let running = 5;
+
+                window.addEventListener('message', (event) => {
+                    if (event.data.method === 'preview' && event.data.id) {
+                        if (event.data.data.url) //can come undefined due to error
+                            previewQueue.push(event.data);
+                    }
+                })
+
+                setInterval(() => {
+                    if (running > 0 && previewQueue.length > 0) {
+                        for (let index = 0; index < Math.min((previewQueue.length), 5); index++) {
+                            const element = previewQueue.pop();
+                            let { url, ext, type, width, height } = element.data;
+
+                            generatePreview(url, ext, type, width, height).then((result) => {
+                                window.parent.postMessage({
+                                    id: element.id,
+                                    data: result
+                                }, '*');
+                                running++;
+                            });
+                            running--;
+                        }
+                    }
+                }, 200)
+            })();
+        });
+    </script>
+</body>
+
+</html>
