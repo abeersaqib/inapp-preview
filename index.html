@@ -28,6 +28,7 @@
                             let { url, ext, type, width, height } = element.data;
 
                             generatePreview(url, ext, type, width, height).then((result) => {
+                                debugger;
                                 window.parent.postMessage({
                                     id: element.id,
                                     data: result
